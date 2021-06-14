@@ -19,6 +19,7 @@ import React from 'react';
 import Header from 'components/Header/Header';
 import Authentication from 'utils/authentication';
 import ParttimeScheduler from 'pages/partTime/schedule/ParttimeScheduler';
+import employeeSignUp from 'pages/employeeSignUp/employeeSignUp';
 
 const App = () => {
   // Authentication(a, b, c)
@@ -100,6 +101,11 @@ const App = () => {
             path="/parttime/:shop?/workingtime"
             exact
             component={Authentication(WorkingTime, true)}
+          />
+          <Route
+            path="/parttime/:shop/signup"
+            exact
+            component={Authentication(employeeSignUp, true)}
           />
         </Switch>
       </div>
