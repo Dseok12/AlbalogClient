@@ -2,11 +2,11 @@
 
 // import logo from './logo.svg';
 import React, { useState } from 'react';
-import './employeeSignUp.css';
+import './EmployeeSignUp.css';
 
-function employeeSignUp() {
+function EmployeeSignUp() {
   return (
-    <div className="employeeSignUp">
+    <div className="EmployeeSignUp">
       <h1>스타벅스점</h1>
       <div className="box-border">
         <form action="#">
@@ -81,4 +81,4 @@ function employeeSignUp() {
   );
 }
 
-export default employeeSignUp;
+export default EmployeeSignUp;
