@@ -2,7 +2,9 @@
 
 // import logo from './logo.svg';
 import axios from 'axios';
+import { APIURL } from 'config';
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 import '../../styles/base/_reset.scss';
 import './EmployeeSignUp.css';
@@ -14,39 +16,40 @@ const [ form, setForm] = useState({
   name: '',
   password: '',
   passwordCheck:'',
-  birthdate: '',
+  cellphone: '',
+  birthdate: null,
   gender: '',
   checkbox: false
 });
-
+const shop = useSelector(state => state.shop);
 // 밑에거는 form객체의 비구조할당
-const { email, name, password, passwordCheck, birthdate, gender, checkbox } = form;
+const { email, name, password, passwordCheck, cellphone, birthdate, gender, checkbox } = form;
 // console.log(email);
 const onChangeHandler = (e) => {
   const { value, name } = e.target;
-  console.log(value, name);
+  // console.log(value, name);
   console.log(e.target.value, e.target.name);
   const nextForm = {
     ...form,
     [name]: value
   };
-  setForm(nextForm);
-  // const form = { 
-  //   // email: '',
-  //   // name: '',
-  //   // password: '',
-  //   // birthdate: '',
-  //   // gender: '',
-  //   // checkbox: false
-  //   원래있는값: name,
-  //   사용자가입력하는값: value
-  // }
-  // console.log(form);
-
+  setForm(nextForm); 
 }
 const onSubmitHandler = (e) => {
   e.preventDefault();
-  console.log(form);
+  let body = {
+    name,
+    email,
+    password,
+    birthdate,
+    cellphone,
+    gender
+  }
+  console.log(body)
+  axios.post(`${APIURL}/employee/60c034f95a12780028009e98/signup`, body ).then((response) => {
+    console.log(response.data);
+  })
+  // console.log(form);
 }
   
   return (
@@ -74,18 +77,23 @@ const onSubmitHandler = (e) => {
               onChange = {onChangeHandler}/>
             </div>
             <div className="input-box">
+              <p>핸드폰번호</p>
+              <input type="number" value={ cellphone } onChange={ onChangeHandler } name = "cellphone" placeholder="핸드폰번호를 입력하세욘." 
+              onChange = {onChangeHandler}/>
+            </div>
+            <div className="input-box">
               <label for="gender-select">성별: </label>
               <select name="gender" id="gender-select"
               value = { gender }
               onChange = { onChangeHandler }>
                   <option value="">선택</option>
-                  <option value="man">남자</option>
-                  <option value="woman">여자</option>
+                  <option value="남성">남자</option>
+                  <option value="여성">여자</option>
               </select>
             </div>
             <div className="input-box">
               <p>생일</p>
-              <input type="date" value={ birthdate } onChange={ onChangeHandler } name = "date" placeholder="2021/01/01" 
+              <input type="date" value={ birthdate } onChange={ onChangeHandler } name = "birthdate" placeholder="2021/01/01" 
               onChange = {onChangeHandler}/>
             </div>
             {/* <div className="input-box">
