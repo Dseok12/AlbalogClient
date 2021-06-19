@@ -22,6 +22,8 @@ import ParttimeScheduler from 'pages/partTime/schedule/ParttimeScheduler';
 import EmployeeSignUp from 'pages/employeeSignUp/EmployeeSignUp';
 import EmployeeLogin from 'pages/employeeLogIn/EmployeeLogin';
 
+
+
 const App = () => {
   // Authentication(a, b, c)
   // a : 컴포넌트
@@ -112,6 +114,11 @@ const App = () => {
             path="/parttime/:shop/signup"
             exact
             component={Authentication(EmployeeSignUp, false)}
+          />
+          <Route
+            path="/parttime/:shop/signup"
+            exact
+            component={Authentication(EmployeeSignUp, true)}
           />
         </Switch>
       </div>
