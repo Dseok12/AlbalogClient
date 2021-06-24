@@ -1,7 +1,9 @@
 import axios from 'axios';
 import AdminAside from 'components/Aside/Aside';
+import Footer from 'components/Footer/Footer';
 import Header from 'components/Header/Header';
 import Loading from 'components/Loading/Loading';
+import MessageModal from 'components/Modal/MessageModal';
 import { APIURL } from 'config';
 import useConfirm from 'hooks/useConfirm';
 
@@ -12,6 +14,7 @@ import './NoticeDetail.scss';
 
 const NoticeDetail = ({ match, shop, user }) => {
   const noticeId = match.params.id;
+  const [messageModalState, setMessageModalState] = useState(false);
 
   const [noticeInfo, setNoticeInfo] = useState({
     title: '',
@@ -37,7 +40,6 @@ const NoticeDetail = ({ match, shop, user }) => {
       });
   }, [shop]);
 
-  const cancelConfirm = () => console.log('취소했습니다.');
 
   const noticeDelete = () => {
     axios
@@ -54,11 +56,10 @@ const NoticeDetail = ({ match, shop, user }) => {
       });
   };
 
-  const confirmDelete = useConfirm(
-    '삭제하시겠습니까?',
-    noticeDelete, // 확인 버튼 눌렀을 때 일어나는 함수
-    cancelConfirm, // 취소 버튼 눌렀을 때 일어나는 함수
-  );
+  const messageModalToggle = () => {
+    setMessageModalState(!messageModalState);
+  };
+
   return (
     <>
       <Header />
@@ -108,14 +109,22 @@ const NoticeDetail = ({ match, shop, user }) => {
                 >
                   수정
                 </Link>
-                <button onClick={confirmDelete} className="btn-list">
+                <button onClick={messageModalToggle} className="btn-list">
                   삭제
                 </button>
               </>
             )}
+
+            {messageModalState && (
+              <MessageModal
+                messageModalToggle={messageModalToggle}
+                deleteCont={noticeDelete}
+              />
+            )}
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

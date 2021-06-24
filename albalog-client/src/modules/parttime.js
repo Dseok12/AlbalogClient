@@ -19,7 +19,7 @@ const parttime = createSlice({
       const {
         stores,
         birthdate,
-        wage,
+        hourly_wage,
         gender,
         shifts,
         timeClocks,
@@ -29,7 +29,7 @@ const parttime = createSlice({
 
       state.store = stores;
       state.birthdate = birthdate;
-      state.wage = wage;
+      state.wage = hourly_wage;
       state.gender = gender;
       state.shift = shifts;
       state.timeclock = timeClocks;
