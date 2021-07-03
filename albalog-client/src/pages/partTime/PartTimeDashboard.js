@@ -9,9 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { IoIosArrowForward } from 'react-icons/io';
 import './PartTimeDashboard.scss';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import client from 'utils/api';
 import Footer from 'components/Footer/Footer';
+import { SetParttime } from 'modules/parttime';
+import Loading from 'components/Loading/Loading';
 
 function PartTimeDashboard() {
   const year = new Date().getFullYear();
@@ -21,19 +23,46 @@ function PartTimeDashboard() {
   const shop = useSelector((state) => state.shop);
   const user = useSelector((state) => state.user);
   const parttime = useSelector((state) => state.parttime);
+  const dispatch = useDispatch();
+
+  // payroll redux에 추가
+  const getPayroll = async () => {
+    try {
+      let response = await client.get(`/timeclock/${shop._id}/staff`);
+      if (response.status === 201) {
+        const newParttime = {
+          ...parttime,
+          payrolls: response.data,
+        };
+        sessionStorage.setItem('parttime', JSON.stringify(newParttime));
+        dispatch(SetParttime(newParttime));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    shop._id && getPayroll();
+  }, [shop]);
 
   const weekArray = ['일', '월', '화', '수', '목', '금', '토'];
   const day = weekArray[new Date().getDay()];
 
+  // 출퇴근 기능
   let clockOut = false;
 
-  const todaytimeclockIn = parttime.timeclock.find(
-    (a) => new Date(a.start_time).toDateString() === new Date().toDateString(),
-  );
+  const todaytimeclockIn =
+    parttime.timeClocks &&
+    parttime.timeClocks.find(
+      (a) => new Date(a.start_time).toDateString() == new Date().toDateString(),
+    );
 
-  const todaytimeclockOut = parttime.timeclock.find(
-    (a) => new Date(a.end_time).toDateString() === new Date().toDateString(),
-  );
+  const todaytimeclockOut =
+    parttime.timeClocks &&
+    parttime.timeClocks.find(
+      (a) => new Date(a.end_time).toDateString() === new Date().toDateString(),
+    );
 
   const getprofile = () => {
     try {
@@ -45,16 +74,15 @@ function PartTimeDashboard() {
       console.log('getprofileErr' + e);
     }
   };
+
   const clickClockIn = (e) => {
     let newForm = {
       locationId: shop._id,
-      start_time: new Date(),
-      wage: 1000,
+      wage: parttime.hourly_wage,
     };
 
     const pushdata = async () => {
       try {
-        // console.log(body);
         let response = await client
           .post(`/timeclock/start`, newForm)
           .then((response) => {
@@ -75,7 +103,6 @@ function PartTimeDashboard() {
     }
     const newForm = {
       locationId: shop._id,
-      end_time: new Date(),
       timeClockId: todaytimeclockIn._id,
     };
     const pushdata = async () => {
@@ -93,6 +120,7 @@ function PartTimeDashboard() {
     };
     pushdata();
   };
+  // 출퇴근 끝
 
   const [Modal, setModal] = useState(false);
   const handleModal = () => {
@@ -101,6 +129,7 @@ function PartTimeDashboard() {
 
   return (
     <>
+      {!parttime && <Loading />}
       <Header />
       <Aside />
       <div id="partTimeDashboard">

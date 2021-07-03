@@ -21,6 +21,9 @@ import ParttimeScheduler from 'pages/partTime/schedule/ParttimeScheduler';
 import EmployeeSignUp from 'pages/employeeSignUp/EmployeeSignUp';
 import MobileCategory from 'pages/mobileCategory/MobileCategory';
 import AdminSchedulePage from 'pages/admin/AdminSchedulePage';
+import FindPassword from 'pages/findPassword/FindPassword';
+import ResetPassword from 'pages/findPassword/ResetPassword';
+
 
 
 
@@ -39,6 +42,16 @@ const App = () => {
             path="/signup"
             component={Authentication(SignUp, false)}
             exact
+          />
+          <Route
+            path="/findpassword"
+            exact
+            component={Authentication(FindPassword, false)}
+          />
+          <Route
+            path="/reset_password/:tokenid"
+            exact
+            component={Authentication(ResetPassword, false)}
           />
           <Route
             path="/:shop/mobile/category"
