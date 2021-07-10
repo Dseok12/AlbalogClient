@@ -42,10 +42,9 @@ function Login({
     axios
       .post(`${APIURL}/login`, loginBody)
       .then((response) => {
-        console.log(response);
         const token = response.data.token;
         const decoded = jwt.verify(token, TOKENKEY);
-        console.log(decoded);
+        console.log(response);
 
         let userBody = {
           _id: response.data.user._id,
@@ -110,7 +109,6 @@ function Login({
           />
           <div className="find-pw">
             <div className="inner-find">
-              <a href="">아이디 찾기</a> |
               <a href="/findpassword">비밀번호 찾기</a>
             </div>
           </div>

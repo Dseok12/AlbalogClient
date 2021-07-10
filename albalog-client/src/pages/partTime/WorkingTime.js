@@ -1,37 +1,44 @@
 import { React, useState } from 'react';
-import {
-  IoIosArrowBack,
-  IoIosArrowForward,
-  IoIosWarning,
-} from 'react-icons/io';
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 import 'pages/partTime/WorkingTime.scss';
 import ContentLine from 'components/partTime/ContentLine';
 import Header from 'components/Header/Header';
 import Aside from 'components/Aside/Aside';
 import Footer from 'components/Footer/Footer';
 import { useSelector } from 'react-redux';
-import Loading from 'components/Loading/Loading';
 
 function WorkingTime() {
-  const [month, setMonth] = useState(`${new Date().toISOString().slice(0, 7)}`);
   const payrolls = useSelector((state) => state.parttime.payrolls);
+  const [month, setMonth] = useState(
+    Number(
+      new Date().toISOString().slice(0, 4) +
+        new Date().toISOString().slice(5, 7),
+    ),
+  );
 
+  console.log(typeof month);
   function filteredPayroll() {
     const monthlyPayroll =
-      payrolls &&
-      payrolls.filter(
-        (a) => a.yearAndMonth.toString() === month.slice(0, 4) + month.slice(5),
-      );
-    return monthlyPayroll[0].timeClock;
+      payrolls && payrolls.filter((a) => Number(a.yearAndMonth) === month);
+    return monthlyPayroll[0] ? monthlyPayroll[0].timeClock : 0;
   }
 
-  const totalWorkingtime = filteredPayroll().reduce((accum, curr) => {
-    return accum + curr.workInToday;
-  }, 0);
+  const totalWorkingtime = filteredPayroll()
+    ? filteredPayroll().reduce((accum, curr) => {
+        return accum + curr.workInToday;
+      }, 0)
+    : 0;
+
+  const onClickLeft = () => {
+    setMonth(month - 1);
+  };
+  const onClickRight = () => {
+    setMonth(month + 1);
+  };
 
   return (
     <>
-      {!payrolls && <Loading />}
+      {/* {!payrolls && <Loading />} */}
       <Header />
       <Aside />
       <div id="workingtime">
@@ -39,9 +46,11 @@ function WorkingTime() {
           <h2>일한시간</h2>
           <div className="table">
             <div className="date-line">
-              {/* <IoIosArrowBack style={{ width: '30px', margin: '0 50px' }} /> */}
-              <b style={{ fontSize: '1.2rem' }}>{month}</b>
-              {/* <IoIosArrowForward style={{ width: '30px', margin: '0 50px' }} /> */}
+              <IoIosArrowBack onClick={onClickLeft} />
+              <b style={{ fontSize: '1.2rem' }}>
+                {month.toString().slice(0, 4)}-{month.toString().slice(4)}
+              </b>
+              <IoIosArrowForward onClick={onClickRight} />
             </div>
             <div className="head-line">
               <div className="date-column">날짜</div>
@@ -61,11 +70,11 @@ function WorkingTime() {
               </div>
             </div>
           </div>
-          <div className="remark-line">
+          {/* <div className="remark-line">
             <IoIosWarning style={{ width: '20px' }} />
             근무자가 출근한 뒤 15시간동안 퇴근하지 않으면 자동으로 퇴근처리되며
             '퇴근미체크'로 표기됩니다.
-          </div>
+          </div> */}
         </div>
       </div>
       <Footer />

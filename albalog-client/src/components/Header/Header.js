@@ -2,6 +2,7 @@ import Loading from 'components/Loading/Loading';
 import InviteModal from 'components/Modal/InviteModal';
 import { SetShop } from 'modules/shop';
 import { SetUser } from 'modules/user';
+import { SetParttime } from 'modules/parttime';
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
@@ -12,7 +13,15 @@ import { FaStoreAlt } from 'react-icons/fa';
 import { BsFillPersonPlusFill } from 'react-icons/bs';
 import { AiOutlineExport } from 'react-icons/ai';
 
-const Header = ({ user, shop, dispatchSetUser, dispatchSetShop, match }) => {
+const Header = ({
+  user,
+  shop,
+  parttime,
+  dispatchSetParttime,
+  dispatchSetUser,
+  dispatchSetShop,
+  match,
+}) => {
   const [isModal, setIsModal] = useState(false);
   console.log('Header 리렌더링');
 
@@ -87,13 +96,45 @@ const Header = ({ user, shop, dispatchSetUser, dispatchSetShop, match }) => {
       });
     }
 
-    if (user.email) {
-      console.log('유저가 있습니다');
-    } else {
-      console.log('유저가 없습니다');
+    if (!user.email) {
       window.location.replace('/login');
     }
-  }, [user]);
+  }, [user, dispatchSetShop, match.params.shop]);
+
+  // payroll과 개인스케줄을 리덕스에 추가
+  useEffect(() => {
+    const getPayroll = async () => {
+      try {
+        let responseP = await client.get(`/timeclock/${shop._id}/staff`);
+        const responseOneSht = await client.get(`/shift/employee/${user._id}`);
+
+        let shift = await responseOneSht.data.map((a) => {
+          const st = new Date(new Date(a.start).getTime() - 540 * 60 * 1000);
+          const ed = new Date(new Date(a.end).getTime() - 540 * 60 * 1000);
+
+          let newData = {
+            title: user.name,
+            start: new Date(st),
+            end: new Date(ed),
+          };
+          return newData;
+        });
+        const shiftParttime = {
+          ...parttime,
+          payrolls: responseP.data,
+          one_shift: shift,
+        };
+        console.log(shiftParttime);
+        sessionStorage.setItem('parttime', JSON.stringify(shiftParttime));
+        dispatchSetParttime(shiftParttime);
+      } catch (error) {
+        console.log('payroll', error);
+      }
+    };
+    if (shop._id && user.role === 'staff') {
+      getPayroll();
+    }
+  }, [shop._id]);
 
   return (
     <>
@@ -134,13 +175,14 @@ const Header = ({ user, shop, dispatchSetUser, dispatchSetShop, match }) => {
 function mapStateToProps(state) {
   // redux state로 부터 state를 component의 props로 전달해줌
   // store의 값이 여기 함수 state로 들어옴
-  return { user: state.user, shop: state.shop };
+  return { user: state.user, shop: state.shop, parttime: state.parttime };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     dispatchSetUser: (UserBody) => dispatch(SetUser(UserBody)),
     dispatchSetShop: (ShopBody) => dispatch(SetShop(ShopBody)),
+    dispatchSetParttime: (ParttimeBody) => dispatch(SetParttime(ParttimeBody)),
   };
 }
 
