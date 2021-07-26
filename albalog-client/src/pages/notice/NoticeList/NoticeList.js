@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './NoticeList.scss';
 import { AiOutlineSearch } from 'react-icons/ai';
 import Pagination from 'components/Pagination/Pagination';
 import { paginate } from 'utils/paginate';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import Header from 'components/Header/Header';
-import AdminAside from 'components/Aside/Aside';
+import Header from 'components/Header';
+import Aside from 'components/Aside';
 import Footer from 'components/Footer/Footer';
 import NoDataType2 from 'components/NoData/NodataType2';
-import client from 'utils/api';
+import { searchNotice } from 'utils/api/notice';
 
 const NoticeList = ({ user, shop }) => {
   const [getNotices, setGetNotices] = useState([]);
@@ -23,43 +23,49 @@ const NoticeList = ({ user, shop }) => {
 
   // utils 함수에 있는 paginate로 화면에 보여줘야할 컨텐츠 개수의 배열을 가져옴
   const pagedNotices = paginate(getNotices, currentPage, pageSize);
+
   useEffect(() => {
     setGetNotices(shop.notices);
-  }, [user, shop]);
+  }, [shop]);
 
   const pageCount = Math.ceil(getNotices.length / pageSize); // 몇 페이지가 필요한지 계산
-  const handlePageChange = (page) => {
-    if (page >= pageCount) {
-      page = pageCount;
-    }
-    if (page <= 1) {
-      page = 1;
-    }
-    setNoticeInfo({
-      ...noticeInfo,
-      currentPage: page,
-    });
-  };
+  const handlePageChange = useCallback(
+    (page) => {
+      if (page >= pageCount) {
+        page = pageCount;
+      }
+      if (page <= 1) {
+        page = 1;
+      }
+      setNoticeInfo({
+        ...noticeInfo,
+        currentPage: page,
+      });
+    },
+    [noticeInfo, pageCount],
+  );
 
-  const NoticeSearchInputChange = (e) => {
+  const NoticeSearchInputChange = useCallback((e) => {
     setSearchNoticeInput(e.target.value);
-  };
+  }, []);
 
-  const NoticeSearchHandle = (e) => {
-    e.preventDefault();
-    let body = {
-      locationId: shop._id,
-      content: searchNoticeInput,
-    };
-    client.post('/location/notice/search', body).then((response) => {
-      setGetNotices(response.data);
-    });
-  };
+  const NoticeSearchHandle = useCallback(
+    async (e) => {
+      e.preventDefault();
+      try {
+        const notices = await searchNotice(shop._id, searchNoticeInput);
+        setGetNotices(notices);
+      } catch (e) {
+        alert('공지사항 검색에 실패했습니다.');
+      }
+    },
+    [searchNoticeInput, shop._id],
+  );
 
   return (
     <>
       <Header />
-      <AdminAside />
+      <Aside />
       <div id="Notice" className="page-layout">
         <div className="cont">
           <div className="search-comm">
@@ -92,36 +98,43 @@ const NoticeList = ({ user, shop }) => {
               </colgroup>
               <thead>
                 <tr>
-                  <th scope="col">내용</th>
+                  <th scope="col">제목</th>
                   <th scope="col">등록일</th>
                 </tr>
               </thead>
-              {!pagedNotices.length && shop._id && (
-                <NoDataType2 text={'등록된 공지사항이 없습니다.'} />
-              )}
 
               <tbody>
-                {pagedNotices.map((notice, index) => (
-                  <tr key={index}>
-                    <td className="td-left">
-                      <div className="inner-cont">
-                        <span className="inner-text">
-                          <Link
-                            to={`/${shop._id}/notice/${notice._id}`}
-                            className="link-text"
-                          >
-                            {notice.title}
-                          </Link>
-                        </span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="inner-cont inner-date">
-                        {notice.createdAt.slice(0, 10)}
-                      </div>
+                {shop._id && pagedNotices.length === 0 ? (
+                  <tr>
+                    <td style={{ borderBottom: 'none' }}>
+                      <NoDataType2 text={'등록된 공지사항이 없습니다.'} />
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  <>
+                    {pagedNotices.map((notice, index) => (
+                      <tr key={index}>
+                        <td className="td-left">
+                          <div className="inner-cont">
+                            <span className="inner-text">
+                              <Link
+                                to={`/${shop._id}/notice/${notice._id}`}
+                                className="link-text"
+                              >
+                                {notice.title}
+                              </Link>
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="inner-cont inner-date">
+                            {notice.createdAt.slice(0, 10)}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </>
+                )}
               </tbody>
             </table>
           </div>
@@ -144,4 +157,4 @@ function mapStateToProps(state) {
   return { shop: state.shop, user: state.user };
 }
 
-export default connect(mapStateToProps)(NoticeList);
+export default React.memo(connect(mapStateToProps)(NoticeList));

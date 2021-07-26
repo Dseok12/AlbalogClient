@@ -1,4 +1,5 @@
 @import 'react-big-calendar/lib/sass/styles';
+@import 'styles/constants/colors';
 
 .AdminSchedule {
   height: 100%;
@@ -9,14 +10,20 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
-    .btn-add {
-      border: 1px solid #dbdbdb;
+    .btn-add,
+    .btn-delAll {
+      border: 1px solid $border;
       border-radius: 4px;
       font-weight: 500;
       color: #fff;
-      background-color: #58c3cc;
       padding: 0.5rem;
       margin-right: 0.5rem;
+    }
+    .btn-add {
+      background-color: #58c3cc;
+    }
+    .btn-delAll {
+      background-color: #f76c5f;
     }
   }
   .schedule-calendar {

@@ -1,60 +1,79 @@
 import React, { useEffect, useState } from 'react';
 import client from 'utils/api';
+import './CommutingStatus.scss';
 
 const CommutingStatus = ({ shopId }) => {
-  // const [a, setA] = useState();
-  // const [b, setB] = useState();
-  // const [employeeList, setEmployeeList] = useState([]);
+  const [employeeList, setEmployeeList] = useState([]);
   const date = new Date();
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
 
-  // const getData = async () => {
-  //   try {
-  //     const response = await client.get(
-  //       `/shift/location/${shopId}/daily/2021-05-12`,
-  //     );
-  //     setEmployeeList(response.data.working);
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const getData = async () => {
+    try {
+      const response = await client.get(
+        `/shift/location/${shopId}/daily/${year}-${month}-${day}`,
+      );
+      setEmployeeList(response.data);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
-  // useEffect(() => {
-  //   getData();
-  // }, [shopId]);
-
-  // useEffect(() => {
-  //   employeeList.forEach((employee) => {
-  //     if (
-  //       employee.time[0].hasOwnProperty('start_time') &&
-  //       employee.time[0].hasOwnProperty('end_time')
-  //     ) {
-  //       console.log('출근하고 퇴근완료');
-  //     } else if (employee.time[0].hasOwnProperty('start_time')) {
-  //       console.log('출근해서 일하는 중');
-  //     } else {
-  //       console.log('출근 안함');
-  //     }
-  //   });
-  // }, [employeeList]);
+  useEffect(() => {
+    getData();
+  }, [shopId]);
 
   return (
     <div className="work">
       <h2 className="date">{`${year}년 ${month}월 ${day}일`}</h2>
       <div className="status">
         <div className="commute-card">
-          <h3 className="title">출근전</h3>
-          <div className="content">윤영훈</div>
+          <h3 className="title">출근전 😵</h3>
+          <div className="content">
+            {employeeList.before &&
+              employeeList.before.map((employee) => (
+                <div className="content-detail">
+                  <strong>{employee.name}</strong>
+                  <p className="before">{`출근 예정 : ${employee.time.start.substr(
+                    11,
+                    5,
+                  )}`}</p>
+                </div>
+              ))}
+          </div>
         </div>
         <div className="commute-card">
-          <h3 className="title">근무중</h3>
-          <div className="content">이도현</div>
+          <h3 className="title">근무중 🔥</h3>
+          <div className="content">
+            {employeeList.working &&
+              employeeList.working.map((employee) => (
+                <div className="content-detail">
+                  <strong>{employee.name}</strong>
+                  <p className="working">{`퇴근 예정 : ${employee.time.end.substr(
+                    11,
+                    5,
+                  )}`}</p>
+                </div>
+              ))}
+          </div>
         </div>
         <div className="commute-card">
-          <h3 className="title">퇴근</h3>
-          <div className="content">서우리</div>
+          <h3 className="title">퇴근 😴</h3>
+          <div className="content">
+            {employeeList.off &&
+              employeeList.off.map((employee) => (
+                <div className="content-detail">
+                  <strong>{employee.name}</strong>
+                  <p className="off">
+                    {`근무 시간 : ${employee.time[0].start_time.substr(
+                      11,
+                      5,
+                    )}~${employee.time[0].end_time.substr(11, 5)}`}
+                  </p>
+                </div>
+              ))}
+          </div>
         </div>
       </div>
     </div>

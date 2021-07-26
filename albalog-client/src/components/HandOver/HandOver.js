@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import client from 'utils/api';
 import './HandOver.scss';
+
+const HandOverItem = ({ transition }) => {
+  return (
+    <p className="content">
+      <strong className={transition.completed ? 'completed' : ''}>
+        {transition.completed
+          ? `- ✔️ ${transition.description}`
+          : `- ❌ ${transition.description}`}
+      </strong>
+    </p>
+  );
+};
 
 const HandOver = ({ shopId }) => {
   const [allTransition, setAllTransition] = useState(null);
@@ -29,17 +40,9 @@ const HandOver = ({ shopId }) => {
       <div className="hand-over">
         {!allTransition && <p>로딩 중..</p>}
         {allTransition &&
-          allTransition.map((transition) => {
-            return (
-              <p className="content">
-                <strong className={transition.completed ? 'completed' : ''}>
-                  {transition.completed
-                    ? `- ✔️${transition.description}`
-                    : `- ❌${transition.description}`}
-                </strong>
-              </p>
-            );
-          })}
+          allTransition.map((transition) => (
+            <HandOverItem key={transition._id} transition={transition} />
+          ))}
       </div>
     </div>
   );

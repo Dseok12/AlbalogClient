@@ -12,6 +12,7 @@ import client from 'utils/api';
 import { FaStoreAlt } from 'react-icons/fa';
 import { BsFillPersonPlusFill } from 'react-icons/bs';
 import { AiOutlineExport } from 'react-icons/ai';
+import { ownerLogout, parttimeLogout } from 'utils/api/user';
 
 const Header = ({
   user,
@@ -29,7 +30,7 @@ const Header = ({
     setIsModal(!isModal);
   };
 
-  const logOutHandler = () => {
+  const logOutHandler = async () => {
     let UserBody = {
       _id: '',
       email: '',
@@ -38,74 +39,61 @@ const Header = ({
       token: '',
     };
     if (user.role === 'owner') {
-      client
-        .post('/owner/logout')
-        .then((response) => {
-          sessionStorage.removeItem('user'); // sessionStorage user를 제거
-          dispatchSetUser(UserBody); // user redux를 초기값으로 설정
-        })
-        .catch(function (error) {
-          // status 코드가 200이 아닌경우 처리
-          if (error) {
-            alert('로그아웃에 실패했습니다.');
-          }
-        });
+      try {
+        await ownerLogout();
+        sessionStorage.removeItem('user');
+        dispatchSetUser(UserBody); // user redux를 초기값으로 설정
+      } catch (e) {
+        alert('로그아웃에 실패했습니다.');
+      }
     } else if (user.role === 'staff') {
-      client
-        .post('/employee/logout')
-        .then((response) => {
-          sessionStorage.removeItem('user'); // localStorage에서 user를 제거
-          dispatchSetUser(UserBody); // user redux를 초기값으로 설정
-          sessionStorage.removeItem('parttime');
-        })
-        .catch(function (error) {
-          // status 코드가 200이 아닌경우 처리
-          if (error) {
-            alert('로그아웃에 실패했습니다.');
-          }
-        });
+      try {
+        await parttimeLogout();
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('parttime');
+        dispatchSetUser(UserBody); // user redux를 초기값으로 설정
+      } catch (e) {
+        alert('로그아웃에 실패했습니다.');
+      }
     }
   };
 
   useEffect(() => {
-    const shopId = match.params.shop;
+    if (!shop._id) {
+      const shopId = match.params.shop;
+      if (user.role === 'owner') {
+        client.get(`/location/${shopId}`).then((response) => {
+          let shopBody = response.data;
+          dispatchSetShop(shopBody);
+        });
+      } else if (user.role === 'staff') {
+        client.get(`/employee/${shopId}`).then((response) => {
+          let shopBody = {
+            _id: response.data._id,
+            name: response.data.name,
+            notices: [...response.data.notices].reverse(),
+            workManuals: response.data.workManuals,
+            address: response.data.address,
+            phone_number: response.data.phone_number,
+            postal_code: response.data.postal_code,
+            employees: response.data.employees,
+          };
 
-    if (user.role === 'owner') {
-      client.get(`/location/${shopId}`).then((response) => {
-        console.log(response.data);
-        let shopBody = response.data;
-
-        dispatchSetShop(shopBody);
-      });
-    } else if (user.role === 'staff') {
-      client.get(`/employee/${shopId}`).then((response) => {
-        console.log(response.data);
-
-        let shopBody = {
-          _id: response.data._id,
-          name: response.data.name,
-          notices: [...response.data.notices].reverse(),
-          workManuals: response.data.workManuals,
-          address: response.data.address,
-          phone_number: response.data.phone_number,
-          postal_code: response.data.postal_code,
-          employees: response.data.employees,
-        };
-
-        dispatchSetShop(shopBody);
-      });
+          dispatchSetShop(shopBody);
+        });
+      }
     }
 
     if (!user.email) {
       window.location.replace('/login');
     }
-  }, [user, dispatchSetShop, match.params.shop]);
+  }, [user, dispatchSetShop, match.params.shop, shop._id]);
 
   // payroll과 개인스케줄을 리덕스에 추가
   useEffect(() => {
     const getPayroll = async () => {
       try {
-        let responseP = await client.get(`/timeclock/${shop._id}/staff`);
+        const responseP = await client.get(`/timeclock/${shop._id}/staff`);
         const responseOneSht = await client.get(`/shift/employee/${user._id}`);
 
         let shift = await responseOneSht.data.map((a) => {
@@ -131,10 +119,11 @@ const Header = ({
         console.log('payroll', error);
       }
     };
-    if (shop._id && user.role === 'staff') {
+
+    if (!parttime.payrolls && shop._id && user.role === 'staff') {
       getPayroll();
     }
-  }, [shop._id]);
+  }, [shop._id, dispatchSetParttime, user._id, parttime, user.name, user.role]);
 
   return (
     <>
@@ -173,8 +162,6 @@ const Header = ({
 };
 
 function mapStateToProps(state) {
-  // redux state로 부터 state를 component의 props로 전달해줌
-  // store의 값이 여기 함수 state로 들어옴
   return { user: state.user, shop: state.shop, parttime: state.parttime };
 }
 
@@ -186,4 +173,6 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Header));
+export default React.memo(
+  withRouter(connect(mapStateToProps, mapDispatchToProps)(Header)),
+);

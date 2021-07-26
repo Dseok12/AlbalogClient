@@ -6,8 +6,14 @@ import { AiOutlineClose } from 'react-icons/ai';
 import { reRender } from 'modules/render';
 import MessageModal from 'components/Modal/MessageModal';
 import { setWorkManual } from 'modules/workManual';
-import { addCategory, deleteCategory, getCategories, updateCategory } from 'utils/api/category';
+import {
+  addCategory,
+  deleteCategory,
+  getCategories,
+  updateCategory,
+} from 'utils/api/category';
 import { useCallback } from 'react';
+import { doubleSubmitCheck } from 'utils/doubleSubmitCheck';
 
 const CategorySetting = ({ categorySetState, CategorySetToggle }) => {
   const shop = useSelector((state) => state.shop);
@@ -39,6 +45,7 @@ const CategorySetting = ({ categorySetState, CategorySetToggle }) => {
 
   // 카테고리 추가 onClick 함수
   const AddCategoryHandle = useCallback(async () => {
+    if (doubleSubmitCheck()) return;
     try {
       const result = await addCategory(shop._id, addCategoryName);
       setCategories(result);
@@ -180,4 +187,4 @@ const CategorySetting = ({ categorySetState, CategorySetToggle }) => {
   ) : null;
 };
 
-export default CategorySetting;
+export default React.memo(CategorySetting);
