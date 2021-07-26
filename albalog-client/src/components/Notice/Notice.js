@@ -1,33 +1,25 @@
+import NoDataType2 from 'components/NoData/NoDataType2';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { weekArray } from 'utils/constants';
 import './Notice.scss';
 
-const Notice = ({ shopId }) => {
+const Notice = () => {
   const announce = useSelector(({ shop }) => shop.notices[0]);
-  // const shopId = useSelector(({ shop }) => shop._id);
-  const days = {
-    0: '일',
-    1: '월',
-    2: '화',
-    3: '수',
-    4: '목',
-    5: '금',
-    6: '토',
-  };
 
   return (
     <div className="notice-container">
       <h3 className="title">📢 최근 공지사항 </h3>
       <div className="notice">
-        {!announce && <strong>등록된 공지사항이 없습니다.</strong>}
+        {!announce && <NoDataType2 text={'등록된 공지사항이 없습니다'} />}
         {announce && (
           <>
-            <Link to={`/${shopId}/notice/${announce._id}`}>
+            <Link to={`/notice/${announce._id}`}>
               <p className="date">
                 📅{' '}
                 {`${announce.updatedAt.substr(0, 10)} ${
-                  days[new Date(announce.updatedAt).getDay()]
+                  weekArray[new Date(announce.updatedAt).getDay()]
                 }`}
               </p>
               <p className="content">

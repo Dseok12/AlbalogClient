@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import 'components/partTime/accountinfo/ProfileInfo.scss';
-import client from 'utils/api';
+import client from 'utils/api/client';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router-dom';
@@ -49,7 +49,7 @@ function ProfileInfo() {
   const onSubmit = async (body) => {
     console.log('data', body);
 
-    if (!!body.newPassword) {
+    if (!!body.newSssword) {
       try {
         let response = await client.patch(`/employee/${shop._id}/update`, body);
         if (response.status === 200) {

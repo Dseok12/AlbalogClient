@@ -10,88 +10,31 @@ import { Link } from 'react-router-dom';
 import { IoIosArrowForward } from 'react-icons/io';
 import './PartTimeDashboard.scss';
 import { useSelector } from 'react-redux';
-import client from 'utils/api';
 import Footer from 'components/Footer/Footer';
 import Loading from 'components/Loading/Loading';
+import TimeclockModal from 'components/Modal/TimeclockModal';
+import useTimeClock from 'hooks/parttime/useTimeClock';
+import { weekArray } from 'utils/constants';
 
 function PartTimeDashboard() {
   const year = new Date().getFullYear();
   const month = new Date().getMonth() + 1;
   const date = new Date().getDate();
   const today = year + '-' + month + '-' + date;
+  const day = weekArray[new Date().getDay()];
   const shop = useSelector((state) => state.shop);
-  const user = useSelector((state) => state.user);
   const parttime = useSelector((state) => state.parttime);
 
-  const weekArray = ['일', '월', '화', '수', '목', '금', '토'];
-  const day = weekArray[new Date().getDay()];
-
-  // 출퇴근 기능
-  const lastTimeClock =
-    parttime.timeClocks && parttime.timeClocks[parttime.timeClocks.length - 1];
-
-  let clockIn = lastTimeClock
-    ? !!lastTimeClock.end_time
-      ? false
-      : true // true면 값을 클릭 불가능
-    : false; // false면 값을 클릭 가능
-  let clockOut = clockIn ? false : true;
-
-  const getprofile = () => {
-    try {
-      client.get(`/location/${shop._id}/employees/${user._id}`).then((res) => {
-        sessionStorage.setItem('parttime', JSON.stringify(res.data));
-        window.location.replace(`/parttime/${shop._id}`);
-      });
-    } catch (e) {
-      console.log('getprofileErr' + e);
-    }
-  };
-
-  const clickClockIn = (e) => {
-    let newForm = {
-      locationId: shop._id,
-      wage: parttime.hourly_wage,
-    };
-
-    const pushdata = async () => {
-      try {
-        await client.post(`/timeclock/start`, newForm).then((response) => {
-          if (response.status === 201) {
-            getprofile();
-          }
-        });
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    pushdata();
-  };
-
-  const clickClockOut = (e) => {
-    clockOut = true;
-    clockIn = false;
-    const newForm = {
-      locationId: shop._id,
-      timeClockId: lastTimeClock._id,
-    };
-    const pushdata = async () => {
-      try {
-        await client
-          .post(`/timeclock/end`, newForm)
-          .then((response) => getprofile());
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    pushdata();
-  };
-  // 출퇴근 끝
-
-  // const [Modal, setModal] = useState(false);
-  // const handleModal = () => {
-  //   setModal(!Modal);
-  // };
+  const {
+    clickClockIn,
+    clickClockOut,
+    clockIn,
+    clockOut,
+    timeclockInModal,
+    timeclockOutModal,
+    timeClockInModalToggle,
+    timeClockOutModalToggle,
+  } = useTimeClock();
 
   return (
     <>
@@ -114,24 +57,24 @@ function PartTimeDashboard() {
                 <div className="fullSchedule">
                   <div className="textLine">
                     <span>전체 스케줄</span>
-                    <span className="moreBtn">
-                      더보기
-                      <IoIosArrowForward />
-                    </span>
+                    <Link to={`/parttime/${shop._id}/scheduler`} option={'all'}>
+                      <span className="moreBtn">
+                        더보기
+                        <IoIosArrowForward />
+                      </span>
+                    </Link>
                   </div>
                   <div className="fullScheduleContent">
-                    <DashboardFullschedule
-                      year={year}
-                      month={month}
-                      date={date}
-                      day={day}
-                    />
+                    <DashboardFullschedule />
                   </div>
                 </div>
                 <div className="personalSchedule">
                   <div className="textLine">
                     <span>개인 스케줄</span>
-                    <Link to={`/parttime/${shop._id}/scheduler`}>
+                    <Link
+                      to={`/parttime/${shop._id}/scheduler`}
+                      option={'personal'}
+                    >
                       <span className="moreBtn">
                         더보기
                         <IoIosArrowForward />
@@ -139,14 +82,8 @@ function PartTimeDashboard() {
                     </Link>
                   </div>
                   <div className="personalScheduleContent">
-                    <DashboardPersonalschedule
-                      year={year}
-                      month={month}
-                      date={date}
-                      day={day}
-                    />
+                    <DashboardPersonalschedule />
                   </div>
-                  <button className="">스케줄 변경 신청</button>
                 </div>
               </div>
             </div>
@@ -156,7 +93,7 @@ function PartTimeDashboard() {
               <div className="btnBox">
                 <button
                   className="clockInBtn"
-                  onClick={clickClockIn}
+                  onClick={timeClockInModalToggle}
                   disabled={clockIn}
                   style={
                     clockIn
@@ -172,7 +109,7 @@ function PartTimeDashboard() {
                 </button>
                 <button
                   className="clockOutBtn"
-                  onClick={clickClockOut}
+                  onClick={timeClockOutModalToggle}
                   disabled={clockOut}
                   style={
                     clockOut
@@ -203,6 +140,20 @@ function PartTimeDashboard() {
               </div>
             </div>
           </div>
+          {timeclockInModal && (
+            <TimeclockModal
+              message="출근 하시겠습니까?"
+              timeClockModalToggle={timeClockInModalToggle}
+              clickClockIn={clickClockIn}
+            />
+          )}
+          {timeclockOutModal && (
+            <TimeclockModal
+              message="퇴근 하시겠습니까?"
+              timeClockModalToggle={timeClockOutModalToggle}
+              clickClockOut={clickClockOut}
+            />
+          )}
         </div>
       </div>
       <Footer />

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import client from 'utils/api';
+import React from 'react';
 import './HandOver.scss';
+import useHandOverEffect from 'hooks/admin/useHandOverEffect';
+import NoDataType2 from 'components/NoData/NoDataType2';
 
 const HandOverItem = ({ transition }) => {
   return (
@@ -14,33 +15,21 @@ const HandOverItem = ({ transition }) => {
   );
 };
 
-const HandOver = ({ shopId }) => {
-  const [allTransition, setAllTransition] = useState(null);
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const year = new Date().getFullYear();
-        const month = new Date().getMonth() + 1;
-        const day = new Date().getDate();
-        const response = await client.get(
-          `/transition/${shopId}/${year}-${month}-${day}`,
-        );
-        setAllTransition(response.data.satisfyTransitions);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getData();
-  }, [shopId]);
+const HandOver = () => {
+  const { allTransition } = useHandOverEffect();
 
   return (
     <div className="hand-over-container">
       <h3 className="title">📋 오늘의 인수인계 사항</h3>
       <div className="hand-over">
         {!allTransition && <p>로딩 중..</p>}
+        {allTransition && allTransition.satisfyTransitions.length < 1 ? (
+          <NoDataType2 text={'인수인계 사항이 없습니다'} />
+        ) : (
+          ''
+        )}
         {allTransition &&
-          allTransition.map((transition) => (
+          allTransition.satisfyTransitions.map((transition) => (
             <HandOverItem key={transition._id} transition={transition} />
           ))}
       </div>

@@ -1,37 +1,40 @@
 import React from 'react';
 import 'components/partTime/dashboard/DashboardFullschedule.scss';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
+import { FaCalendarTimes } from 'react-icons/fa';
+import moment from 'moment';
+import useAllShift from 'hooks/common/useAllShift';
 
-function DashboardFullschedule({ year, month, date, day }) {
+function DashboardFullschedule() {
+  const { today, onClickLeft, onClickRight, filteredShift } = useAllShift();
+
   return (
     <div id="fullschedule-content">
       <div className="txtline">
-        <IoIosArrowBack style={{ cursor: 'pointer' }} />
-        {year}년 {month}월 {date}일 {day}요일
-        <IoIosArrowForward style={{ cursor: 'pointer' }} />
+        <IoIosArrowBack onClick={onClickLeft} />
+        {today}
+        <IoIosArrowForward onClick={onClickRight} />
       </div>
       <div className="full-table">
-        <div className="tr">
-          <div className="shift">
-            <p>오픈 </p>
-            <p>08:00 - 12:00</p>
-          </div>
-          <p>이도현, 김태희</p>
-        </div>
-        <div className="tr">
-          <div className="shift">
-            <p>미들 </p>
-            <p>14:00 - 18:00</p>
-          </div>
-          <p>김태희, 서우리</p>
-        </div>
-        <div className="tr">
-          <div className="shift">
-            <p>마감</p>
-            <p>18:00 - 22:00</p>
-          </div>
-          <p>윤영훈, 김동완</p>
-        </div>
+        {filteredShift().length > 0 ? (
+          filteredShift()
+            .sort((a, b) => a.start - b.start)
+            .map((a, i) => {
+              return (
+                <div className="tr" key={i}>
+                  <div className="worker">
+                    <p key={i}>{a.title}</p>
+                  </div>
+                  <div className="working-time">
+                    <p>{moment(a.start).format('hh:mm')}</p>~
+                    <p>{moment(a.end).format('hh:mm')}</p>
+                  </div>
+                </div>
+              );
+            })
+        ) : (
+          <FaCalendarTimes />
+        )}
       </div>
     </div>
   );

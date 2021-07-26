@@ -1,5 +1,6 @@
 import ModalLoading from 'components/Loading/ModalLoading';
 import MessageModal from 'components/Modal/MessageModal';
+import NoDataType1 from 'components/NoData/NoDataType1';
 import { setTransition } from 'modules/transition';
 import React, { useEffect, useState } from 'react';
 import { useCallback } from 'react';
@@ -17,8 +18,8 @@ import {
   toggleTransition,
   updateTransition,
 } from 'utils/api/transition';
-import { doubleSubmitCheck } from 'utils/doubleSubmitCheck';
 import './TransitionList.scss';
+import TransitionIMG from 'static/Transition.png';
 
 const TransitionList = ({ date }) => {
   const { year, month, day } = date;
@@ -58,7 +59,6 @@ const TransitionList = ({ date }) => {
 
   // 인수인계 추가
   const onCreate = useCallback(async () => {
-    if (doubleSubmitCheck()) return;
     try {
       const transitions = await createTransition(
         shop._id,
@@ -163,6 +163,11 @@ const TransitionList = ({ date }) => {
       <div className="transition-list">
         {loadingState && transitions ? (
           <ul>
+            {transitions.length < 1 ? (
+              <NoDataType1 text={'인수인계가 없습니다'} img={TransitionIMG} />
+            ) : (
+              ''
+            )}
             {transitions &&
               transitions.map((transition, index) => (
                 <li key={index}>

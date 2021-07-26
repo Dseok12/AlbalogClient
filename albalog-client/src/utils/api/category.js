@@ -1,9 +1,10 @@
-import client from 'utils/api';
+import client from 'utils/api/client';
 
 // 카테고리 불러오기
 export const getCategories = async (shopid) => {
   const response = await client.get(`/category/${shopid}`);
-  return [...response.data].reverse();
+  console.log(response);
+  return [...response.data.categories].reverse();
 };
 
 // 카테고리 등록
@@ -12,6 +13,7 @@ export const addCategory = async (shopid, name) => {
     name,
   };
   const response = await client.post(`/category/${shopid}/create`, body);
+  console.log(response);
   return [...response.data.categories].reverse();
 };
 
@@ -31,5 +33,6 @@ export const updateCategory = async (locationId, categoryId, name) => {
     name,
   };
   const response = await client.patch(`/category/update`, body);
+  console.log(response);
   return [...response.data.categories].reverse();
 };

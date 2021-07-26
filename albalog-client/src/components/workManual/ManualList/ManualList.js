@@ -3,21 +3,24 @@ import NoDataType1 from 'components/NoData/NoDataType1';
 import { setWorkManual } from 'modules/workManual';
 import React, { useEffect, useState } from 'react';
 import { useCallback } from 'react';
-import { AiOutlineEdit } from 'react-icons/ai';
+import { AiOutlineEdit, AiFillDelete } from 'react-icons/ai';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import { getWorkManuals } from 'utils/api/workmanual';
-import ManualEdit from '../ManualEdit/ManualEdit';
+import { deleteManual, getWorkManuals } from 'utils/api/workmanual';
+import ManualIMG from 'static/WorkManual.png';
+import { useHistory } from 'react-router-dom';
+import MessageModal from 'components/Modal/MessageModal';
 
 const ManualList = ({ category, user, shop }) => {
   const [manualList, setManualList] = useState([]);
-  const [editState, setEditState] = useState(false);
+  const manual = useSelector((state) => state.workManual);
+  const [deleteState, setDeleteState] = useState(false);
   const [loadingState, setLoadingState] = useState(false);
-  const render = useSelector((state) => state.render);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const ToggleButton = useCallback(() => {
-    setEditState(!editState);
-  }, [editState]);
+    setDeleteState(!deleteState);
+  }, [deleteState]);
 
   // 매뉴얼 수정 함수
   const EditHandle = useCallback(
@@ -30,10 +33,29 @@ const ManualList = ({ category, user, shop }) => {
       };
 
       dispatch(setWorkManual(manualBody));
-      ToggleButton();
+      history.push(`/${shop._id}/workmanual/edit/${manual._id}`);
     },
-    [ToggleButton, dispatch],
+    [dispatch, history, shop._id],
   );
+  const DeleteHandle = (manual) => {
+    dispatch(
+      setWorkManual({
+        _id: manual._id,
+      }),
+    );
+    ToggleButton();
+  };
+
+  // 매뉴얼 삭제 함수
+  const onDelete = useCallback(async () => {
+    console.log(manual._id);
+    try {
+      await deleteManual(shop._id, manual._id);
+      window.location.replace(`/${shop._id}/workmanual/list`);
+    } catch (e) {
+      alert('매뉴얼 삭제에 실패하였습니다.');
+    }
+  }, [shop._id, manual._id]);
 
   useEffect(() => {
     const getData = async () => {
@@ -51,12 +73,12 @@ const ManualList = ({ category, user, shop }) => {
     if (shop.name) {
       getData();
     }
-  }, [shop, category, render]);
+  }, [shop, category]);
 
   return (
     <div className="manual-list">
       {!manualList.length && shop._id && loadingState && (
-        <NoDataType1 text={'등록된 업무 매뉴얼이 없습니다.'} />
+        <NoDataType1 text={'등록된 업무 매뉴얼이 없습니다.'} img={ManualIMG} />
       )}
       {loadingState === true && manualList ? (
         <ul>
@@ -64,7 +86,7 @@ const ManualList = ({ category, user, shop }) => {
             return (
               <li key={index}>
                 <div className="manual-title">
-                  {manual.title}
+                  <div className="title">{manual.title}</div>
                   {user.role === 'owner' && (
                     <div className="ico">
                       <button
@@ -73,11 +95,20 @@ const ManualList = ({ category, user, shop }) => {
                       >
                         <AiOutlineEdit size="24" />
                       </button>
+                      <button
+                        onClick={() => DeleteHandle(manual)}
+                        className="btn"
+                      >
+                        <AiFillDelete size="24" />
+                      </button>
                     </div>
                   )}
                 </div>
                 <br />
-                <div dangerouslySetInnerHTML={{ __html: manual.content }}></div>
+                <div
+                  className="manual-content"
+                  dangerouslySetInnerHTML={{ __html: manual.content }}
+                ></div>
               </li>
             );
           })}
@@ -85,9 +116,8 @@ const ManualList = ({ category, user, shop }) => {
       ) : (
         <ModalLoading />
       )}
-
-      {editState && (
-        <ManualEdit editState={editState} ToggleButton={ToggleButton} />
+      {deleteState && (
+        <MessageModal messageModalToggle={ToggleButton} deleteCont={onDelete} />
       )}
     </div>
   );

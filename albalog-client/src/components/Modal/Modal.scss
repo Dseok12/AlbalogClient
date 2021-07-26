@@ -41,6 +41,24 @@
         margin-bottom: 2rem;
       }
 
+      .radio-group {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin-bottom: 2rem;
+        padding: 1rem;
+
+        label {
+          flex-shrink: 0;
+          margin-bottom: 0;
+        }
+        input {
+          width: 20px;
+          margin-bottom: 0;
+        }
+      }
+
       .choose-time {
         display: flex;
         align-items: center;
@@ -51,9 +69,10 @@
         }
         margin-bottom: 2rem;
       }
-
-      .btn-invite,
-      .btn-close {
+      .btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 100%;
         margin-bottom: 1rem;
         border: none;
@@ -61,6 +80,12 @@
         font-weight: bold;
         letter-spacing: 2px;
         padding: 0.75rem;
+      }
+
+      .btn-create {
+        background-color: $btn-main;
+        color: #fff;
+        margin-top: 1rem;
       }
       .btn-invite {
         background-color: #18191d;

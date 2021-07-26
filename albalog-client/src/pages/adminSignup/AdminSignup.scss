@@ -1,0 +1,148 @@
+#signup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  box-sizing: border-box;
+
+  .signup-img {
+    width: 400px;
+    margin-right: 30px;
+  }
+
+  .inner-signup {
+    display: flex;
+    flex-direction: column;
+    margin: 2rem;
+    h1 {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .signup-form {
+      display: flex;
+      justify-self: flex-start;
+      align-items: center;
+      margin: 10px 0;
+      .email-check {
+        border: 1px solid #389bdc;
+        height: 44px;
+        color: #389bdc;
+        width: 120px;
+        border-radius: 10px;
+        margin-left: 10px;
+      }
+      span {
+        width: 120px;
+      }
+      input,
+      .input {
+        height: 44px;
+        width: 332px;
+        padding: 0 14px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        color: #333;
+        line-height: 20px;
+        border-radius: 3px;
+        background: #fff;
+        outline: none;
+        vertical-align: top;
+      }
+    }
+
+    .error {
+      font-size: 12px;
+      color: #b3130b;
+      margin-left: 120px;
+      line-height: 18px;
+      word-break: break-all;
+    }
+
+    .error::before {
+      content: '\2715';
+      display: inline-block;
+      padding-right: 3px;
+      font-size: 12px;
+      vertical-align: 0;
+    }
+
+    .good {
+      font-size: 12px;
+      color: #0f851a;
+      margin-left: 120px;
+      line-height: 18px;
+      word-break: break-all;
+    }
+    .good::before {
+      content: '\2713';
+      display: inline-block;
+      padding: 0 4px 0 2px;
+      font-size: 12px;
+      vertical-align: 0;
+    }
+
+    .sign-up-btn {
+      display: flex;
+      justify-content: center;
+      .form-submit {
+        background: #389bdc;
+        color: whitesmoke;
+        border-radius: 4px;
+        min-height: 44px;
+        width: 200px;
+        margin-top: 1rem;
+        padding: 0;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  body {
+    #signup {
+      position: relative;
+      display: block;
+      .signUpLeft {
+        margin: 0;
+        height: auto;
+        padding: 0 20px;
+        .signup-form {
+          display: block;
+          .inner-email-form {
+            position: relative;
+            padding-right: 80px;
+            .email-check {
+              position: absolute;
+              right: 0;
+              top: 0;
+              width: 70px;
+              font-size: 14px;
+            }
+          }
+          input {
+            width: 100%;
+          }
+          span {
+            display: block;
+            margin-bottom: 8px;
+          }
+        }
+        .error,
+        .good {
+          margin-left: 0;
+        }
+        .sign-up-btn {
+          .form-submit {
+            width: 100%;
+          }
+        }
+      }
+    }
+  }
+}
